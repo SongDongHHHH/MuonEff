@@ -1,0 +1,9 @@
+root://cms-xrdr.sdfarm.kr:1094///xrd/store/relval/CMSSW_8_1_0_pre8/RelValZMM_13/GEN-SIM-RECO/PU25ns_81X_mcRun2_asymptotic_v1-v1/10000/028C84AD-8B44-E611-9EE4-0025905A60D0.root
+root://cms-xrdr.sdfarm.kr:1094///xrd/store/relval/CMSSW_8_1_0_pre8/RelValZMM_13/GEN-SIM-RECO/PU25ns_81X_mcRun2_asymptotic_v1-v1/10000/04B1EEE2-9744-E611-B590-0025905B856E.root
+root://cms-xrdr.sdfarm.kr:1094///xrd/store/relval/CMSSW_8_1_0_pre8/RelValZMM_13/GEN-SIM-RECO/PU25ns_81X_mcRun2_asymptotic_v1-v1/10000/0AA6BD15-8C44-E611-8EA2-0CC47A4C8EA8.root
+root://cms-xrdr.sdfarm.kr:1094///xrd/store/relval/CMSSW_8_1_0_pre8/RelValZMM_13/GEN-SIM-RECO/PU25ns_81X_mcRun2_asymptotic_v1-v1/10000/4A0C22A2-8B44-E611-9BF6-0025905A612A.root
+root://cms-xrdr.sdfarm.kr:1094///xrd/store/relval/CMSSW_8_1_0_pre8/RelValZMM_13/GEN-SIM-RECO/PU25ns_81X_mcRun2_asymptotic_v1-v1/10000/64E5DDCA-8B44-E611-A17F-0025905A6138.root
+root://cms-xrdr.sdfarm.kr:1094///xrd/store/relval/CMSSW_8_1_0_pre8/RelValZMM_13/GEN-SIM-RECO/PU25ns_81X_mcRun2_asymptotic_v1-v1/10000/66687402-9844-E611-B599-0CC47A4D76BE.root
+root://cms-xrdr.sdfarm.kr:1094///xrd/store/relval/CMSSW_8_1_0_pre8/RelValZMM_13/GEN-SIM-RECO/PU25ns_81X_mcRun2_asymptotic_v1-v1/10000/7AF34711-8A44-E611-96C0-0CC47A74525A.root
+root://cms-xrdr.sdfarm.kr:1094///xrd/store/relval/CMSSW_8_1_0_pre8/RelValZMM_13/GEN-SIM-RECO/PU25ns_81X_mcRun2_asymptotic_v1-v1/10000/DE591F56-8A44-E611-BCEA-0025905A60B4.root
+root://cms-xrdr.sdfarm.kr:1094///xrd/store/relval/CMSSW_8_1_0_pre8/RelValZMM_13/GEN-SIM-RECO/PU25ns_81X_mcRun2_asymptotic_v1-v1/10000/F27D7C1B-8A44-E611-9929-0025905A612A.root

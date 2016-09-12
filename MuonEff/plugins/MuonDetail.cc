@@ -47,6 +47,7 @@ class MuonDetail : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
 
       TTree * tr;
       bool b_global; bool b_pf;
+      float b_chi2pos; float b_trkKink; float b_segcompati;
       float b_chi2; int b_nglobalhits; int b_nstations;
       float b_trackdxy; float b_trackdz;
       int b_ninnerhits; float b_trackerlayers;
@@ -74,6 +75,9 @@ MuonDetail::MuonDetail(const edm::ParameterSet& iConfig)
 
   tr->Branch("isGlobalMuon", &b_global, "isGlobalMuon/O");
   tr->Branch("isPFMuon", &b_pf, "isPFMuon/O");
+  tr->Branch("chi2LocalPosition", &b_chi2pos, "chi2LocalPosition/F");
+  tr->Branch("trkKink", &b_trkKink, "trkKink/F");
+  tr->Branch("segmentCompatibility", &b_segcompati, "segmentCompatibility/F");
   tr->Branch("normalizedChi2", &b_chi2, "normalizedChi2/F");
   tr->Branch("numberOfValidMuonHits", &b_nglobalhits, "numberOfValidMuonHits/I");
   tr->Branch("numberOfMatchedStations", &b_nstations, "numberOfMatchedStations/I");
@@ -99,7 +103,6 @@ void MuonDetail::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   iEvent.getByToken(genParticleToken_, genParticles);
   collectGenMuons(*genParticles, genMuons, genMuonsFromZ);
 
-  ///// id
   edm::Handle<std::vector<reco::Muon> > muons;
   iEvent.getByToken(muonToken_, muons);
   double rcut = 0.3;
@@ -112,11 +115,21 @@ void MuonDetail::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     }
 
     if (fake == isFake){
+      //loose
       b_global = mu.isGlobalMuon();
       b_pf = mu.isPFMuon();
-      b_nstations = mu.numberOfMatchedStations();
+
+      //medium
       if ( mu.globalTrack().isNonnull() ){
           b_chi2 = mu.globalTrack()->normalizedChi2();
+      }
+      b_chi2pos = mu.combinedQuality().chi2LocalPosition;
+      b_trkKink = mu.combinedQuality().trkKink;
+      b_segcompati = muon::segmentCompatibility(mu);
+
+      //tight
+      b_nstations = mu.numberOfMatchedStations();
+      if ( mu.globalTrack().isNonnull() ){
           b_nglobalhits = mu.globalTrack()->hitPattern().numberOfValidMuonHits();
       }
       if ( mu.muonBestTrack().isNonnull() ){

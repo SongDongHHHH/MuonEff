@@ -9,9 +9,9 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring())
 process.source.fileNames = ['root://cms-xrdr.sdfarm.kr:1094///xrd/store/user/tt8888tt/muon/nopu/0AACA53D-C33D-E611-B180-0025905A612C.root',
-                            #'root://cms-xrdr.sdfarm.kr:1094///xrd/store/user/tt8888tt/muon/nopu/34742466-C03D-E611-AA9B-0025905B85A2.root',
-                            #'root://cms-xrdr.sdfarm.kr:1094///xrd/store/user/tt8888tt/muon/nopu/40245918-C33D-E611-A87C-0025905A6066.root',
-                            #'root://cms-xrdr.sdfarm.kr:1094///xrd/store/user/tt8888tt/muon/nopu/4640E9AE-B63D-E611-88D4-0CC47A78A4A6.root',
+                            'root://cms-xrdr.sdfarm.kr:1094///xrd/store/user/tt8888tt/muon/nopu/34742466-C03D-E611-AA9B-0025905B85A2.root',
+                            'root://cms-xrdr.sdfarm.kr:1094///xrd/store/user/tt8888tt/muon/nopu/40245918-C33D-E611-A87C-0025905A6066.root',
+                            'root://cms-xrdr.sdfarm.kr:1094///xrd/store/user/tt8888tt/muon/nopu/4640E9AE-B63D-E611-88D4-0CC47A78A4A6.root',
                             'root://cms-xrdr.sdfarm.kr:1094///xrd/store/user/tt8888tt/muon/nopu/D243AE89-B93D-E611-96AC-0CC47A4D7626.root',]
 """
 process.source.fileNames = ['root://cms-xrdr.sdfarm.kr:1094///xrd/store/user/tt8888tt/muon/pu35/063C4686-F73E-E611-BC5A-0025905B85BA.root',
@@ -33,14 +33,6 @@ process.source.fileNames = ['root://cms-xrdr.sdfarm.kr:1094///xrd/store/user/tt8
                             'root://cms-xrdr.sdfarm.kr:1094///xrd/store/user/tt8888tt/muon/pu35/E8483BF0-EF3E-E611-A7E9-0CC47A78A30E.root',
                             'root://cms-xrdr.sdfarm.kr:1094///xrd/store/user/tt8888tt/muon/pu35/ECC3668F-EC3E-E611-A407-0025905B85DE.root',
                             'root://cms-xrdr.sdfarm.kr:1094///xrd/store/user/tt8888tt/muon/pu35/F6544920-E83E-E611-B935-002618FDA287.root',]
-process.source.fileNames = ['root://cms-xrdr.sdfarm.kr:1094///xrd/store/relval/CMSSW_8_1_0_pre8/RelValZMM_13/GEN-SIM-RECO/PU25ns_81X_mcRun2_asymptotic_v1-v1/10000/04B1EEE2-9744-E611-B590-0025905B856E.root',
-                            'root://cms-xrdr.sdfarm.kr:1094///xrd/store/relval/CMSSW_8_1_0_pre8/RelValZMM_13/GEN-SIM-RECO/PU25ns_81X_mcRun2_asymptotic_v1-v1/10000/0AA6BD15-8C44-E611-8EA2-0CC47A4C8EA8.root',
-                            'root://cms-xrdr.sdfarm.kr:1094///xrd/store/relval/CMSSW_8_1_0_pre8/RelValZMM_13/GEN-SIM-RECO/PU25ns_81X_mcRun2_asymptotic_v1-v1/10000/4A0C22A2-8B44-E611-9BF6-0025905A612A.root',
-                            'root://cms-xrdr.sdfarm.kr:1094///xrd/store/relval/CMSSW_8_1_0_pre8/RelValZMM_13/GEN-SIM-RECO/PU25ns_81X_mcRun2_asymptotic_v1-v1/10000/64E5DDCA-8B44-E611-A17F-0025905A6138.root',
-                            'root://cms-xrdr.sdfarm.kr:1094///xrd/store/relval/CMSSW_8_1_0_pre8/RelValZMM_13/GEN-SIM-RECO/PU25ns_81X_mcRun2_asymptotic_v1-v1/10000/66687402-9844-E611-B599-0CC47A4D76BE.root',
-                            'root://cms-xrdr.sdfarm.kr:1094///xrd/store/relval/CMSSW_8_1_0_pre8/RelValZMM_13/GEN-SIM-RECO/PU25ns_81X_mcRun2_asymptotic_v1-v1/10000/7AF34711-8A44-E611-96C0-0CC47A74525A.root',
-                            'root://cms-xrdr.sdfarm.kr:1094///xrd/store/relval/CMSSW_8_1_0_pre8/RelValZMM_13/GEN-SIM-RECO/PU25ns_81X_mcRun2_asymptotic_v1-v1/10000/DE591F56-8A44-E611-BCEA-0025905A60B4.root',
-                            'root://cms-xrdr.sdfarm.kr:1094///xrd/store/relval/CMSSW_8_1_0_pre8/RelValZMM_13/GEN-SIM-RECO/PU25ns_81X_mcRun2_asymptotic_v1-v1/10000/F27D7C1B-8A44-E611-9929-0025905A612A.root']
 """
 
 

@@ -40,7 +40,6 @@ process.MuonDetail = cms.EDAnalyzer("MuonDetail",
     vertexs = cms.InputTag("offlinePrimaryVertices"),
     genParticles = cms.InputTag("genParticles"),
     muons = cms.InputTag("muons"),
-    isFake = cms.bool(True),
 )
 
 process.TFileService = cms.Service("TFileService",

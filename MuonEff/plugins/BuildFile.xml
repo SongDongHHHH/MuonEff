@@ -4,6 +4,7 @@
 <use name="clhep"/>
 <use name="root"/>
 <use name="rootcore"/>
+<use name="TMVA"/>
 <use name="CommonTools/UtilAlgos"/>
 <use name="SimDataFormats/Track"/>
 <use name="SimDataFormats/Vertex"/>

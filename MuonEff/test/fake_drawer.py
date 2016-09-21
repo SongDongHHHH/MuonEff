@@ -11,17 +11,17 @@ def getTH1(tree, title, binning, plotvar, cut):
 
 plotvarlst = ['isGlobalMuon',
               'isPFMuon',
+              'normalizedChi2',
               'chi2LocalPosition',
               'trkKink',
               'segmentCompatibility',
-              'normalizedChi2',
               'numberOfValidMuonHits',
               'numberOfMatchedStations',
               'pv0pos_dxy',
               'pv0pos_dz',
               'numberOfValidPixelHits',
               'trackerLayersWithMeasurement']
-binninglst = [[2,0,2], [2,0,2], [40,0,20], [50,0,50], [50,0,1], [40,0,10], [60,0,60], [6,0,6], [50,0,1], [50,0,5], [15,0,15], [15,0,15]]
+binninglst = [[2,0,2], [2,0,2], [40,0,10], [40,0,20], [50,0,50], [50,0,1], [60,0,60], [6,0,6], [50,0,1], [50,0,5], [15,0,15], [15,0,15]]
 cut = [1,1,0,0,0,10.,0,1,0.2,0.5,0,5]
 
 names=["nopu","pu35","pu140","pu200"]

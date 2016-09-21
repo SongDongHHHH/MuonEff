@@ -79,10 +79,10 @@ MuonDetail::MuonDetail(const edm::ParameterSet& iConfig)
   tr_true->Branch("muonPhi", &b_mu_phi, "muonPhi/F");
   tr_true->Branch("isGlobalMuon", &b_global, "isGlobalMuon/O");
   tr_true->Branch("isPFMuon", &b_pf, "isPFMuon/O");
+  tr_true->Branch("normalizedChi2", &b_chi2, "normalizedChi2/F");
   tr_true->Branch("chi2LocalPosition", &b_chi2pos, "chi2LocalPosition/F");
   tr_true->Branch("trkKink", &b_trkKink, "trkKink/F");
   tr_true->Branch("segmentCompatibility", &b_segcompati, "segmentCompatibility/F");
-  tr_true->Branch("normalizedChi2", &b_chi2, "normalizedChi2/F");
   tr_true->Branch("numberOfValidMuonHits", &b_nglobalhits, "numberOfValidMuonHits/I");
   tr_true->Branch("numberOfMatchedStations", &b_nstations, "numberOfMatchedStations/I");
   tr_true->Branch("pv0pos_dxy", &b_trackdxy, "pv0pos_dxy/F");
@@ -95,10 +95,10 @@ MuonDetail::MuonDetail(const edm::ParameterSet& iConfig)
   tr_fake->Branch("muonPhi", &b_mu_phi, "muonPhi/F");
   tr_fake->Branch("isGlobalMuon", &b_global, "isGlobalMuon/O");
   tr_fake->Branch("isPFMuon", &b_pf, "isPFMuon/O");
+  tr_fake->Branch("normalizedChi2", &b_chi2, "normalizedChi2/F");
   tr_fake->Branch("chi2LocalPosition", &b_chi2pos, "chi2LocalPosition/F");
   tr_fake->Branch("trkKink", &b_trkKink, "trkKink/F");
   tr_fake->Branch("segmentCompatibility", &b_segcompati, "segmentCompatibility/F");
-  tr_fake->Branch("normalizedChi2", &b_chi2, "normalizedChi2/F");
   tr_fake->Branch("numberOfValidMuonHits", &b_nglobalhits, "numberOfValidMuonHits/I");
   tr_fake->Branch("numberOfMatchedStations", &b_nstations, "numberOfMatchedStations/I");
   tr_fake->Branch("pv0pos_dxy", &b_trackdxy, "pv0pos_dxy/F");
@@ -190,8 +190,8 @@ void MuonDetail::treereset()
 {
   b_mu_pt = -9; b_mu_eta = -9; b_mu_phi = -9;
   b_global = -9; b_pf = -9;
-  b_chi2pos = -9; b_trkKink = -9; b_segcompati = -9;
-  b_chi2 = -9; b_nglobalhits = -9; b_nstations = -9;
+  b_chi2 = -9; b_chi2pos = -9; b_trkKink = -9; b_segcompati = -9;
+  b_nglobalhits = -9; b_nstations = -9;
   b_trackdxy = -9; b_trackdz = -9;
   b_ninnerhits = -9; b_trackerlayers = -9;
 }

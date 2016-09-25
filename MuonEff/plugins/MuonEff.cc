@@ -16,7 +16,7 @@
 #include "DataFormats/MuonReco/interface/MuonSelectors.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
-
+#include "SimDataFormats/TrackingHit/interface/PSimHit.h"
 
 #include <TTree.h>
 #include <TFile.h>
@@ -37,6 +37,8 @@ class MuonEff : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
       ~MuonEff();
       TLorentzVector ToTLorentzVector(const reco::Muon& t) { return TLorentzVector(t.px(), t.py(), t.pz(), t.energy()); }
       TLorentzVector ToTLorentzVector(const reco::GenParticle& t) { return TLorentzVector(t.px(), t.py(), t.pz(), t.energy()); }
+      bool isGEMrange(const reco::Muon& m) { return (abs(m.eta()) >1.6 && abs(m.eta()) <2.4); }
+      bool isGEMrange(const reco::GenParticle& m) { return (abs(m.eta()) >1.6 && abs(m.eta()) <2.4); }
 
       void collectGenMuons(const std::vector<reco::GenParticle> &genParticles, std::vector<reco::GenParticle>& genMuons, std::vector<reco::GenParticle>& genMuonsFromZ) const;
       bool tightByStep(const reco::Muon& mu, reco::Vertex pv0) const;
@@ -48,20 +50,23 @@ class MuonEff : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
       TH1D* h_nevents;
       TH1D* h_genMuons_pt; TH1D* h_genMuons_eta; TH1D* h_genMuons_phi;
       TH1D* h_tight_pt; TH1D* h_tight_eta; TH1D* h_tight_phi;
-      TH1D* h_tightbystep_pt; TH1D* h_tightbystep_eta; TH1D* h_tightbystep_phi;
+      TH1D* h_tightByStep_pt; TH1D* h_tightByStep_eta; TH1D* h_tightByStep_phi;
       TH1D* h_medium_pt; TH1D* h_medium_eta; TH1D* h_medium_phi;
       TH1D* h_loose_pt; TH1D* h_loose_eta; TH1D* h_loose_phi;
-      TH1D* h_tightfake_pt; TH1D* h_tightfake_eta; TH1D* h_tightfake_phi;
-      TH1D* h_tightbystepfake_pt; TH1D* h_tightbystepfake_eta; TH1D* h_tightbystepfake_phi;
-      TH1D* h_mediumfake_pt; TH1D* h_mediumfake_eta; TH1D* h_mediumfake_phi;
-      TH1D* h_loosefake_pt; TH1D* h_loosefake_eta; TH1D* h_loosefake_phi;
+      TH1D* h_tightFake_pt; TH1D* h_tightFake_eta; TH1D* h_tightFake_phi;
+      TH1D* h_tightByStepFake_pt; TH1D* h_tightByStepFake_eta; TH1D* h_tightByStepFake_phi;
+      TH1D* h_mediumFake_pt; TH1D* h_mediumFake_eta; TH1D* h_mediumFake_phi;
+      TH1D* h_looseFake_pt; TH1D* h_looseFake_eta; TH1D* h_looseFake_phi;
       TH1D* h_tightdetail;
       TH1D* h_hitmap; TH1D* h_hitmap_inrange;
-      TH1D* h_tighttest; TH1D* h_tightbysteptest; TH1D* h_mediumtest; TH1D* h_loosetest;
+      TH1D* h_tighttest; TH1D* h_tightBySteptest; TH1D* h_mediumtest; TH1D* h_loosetest;
+
+      TH1D* h_nGemhits_true; TH1D* h_nGemhits_fake;
 
       edm::EDGetTokenT<std::vector<reco::GenParticle> > genParticleToken_;
       edm::EDGetTokenT<std::vector<reco::Muon> > muonToken_;
       edm::EDGetTokenT<std::vector<reco::Vertex> > vtxToken_;
+      edm::EDGetTokenT<std::vector<PSimHit> > MuonGEMHitsToken_;
 
 };
 
@@ -74,50 +79,54 @@ MuonEff::MuonEff(const edm::ParameterSet& iConfig)
   genParticleToken_ = consumes<std::vector<reco::GenParticle> >(iConfig.getParameter<edm::InputTag>("genParticles"));
   muonToken_ = consumes<std::vector<reco::Muon> >(iConfig.getParameter<edm::InputTag>("muons"));
   vtxToken_ = consumes<std::vector<reco::Vertex> >(iConfig.getParameter<edm::InputTag>("vertexs"));
+  MuonGEMHitsToken_ = consumes<std::vector<PSimHit> >(iConfig.getParameter<edm::InputTag>("MuonGEMHits"));
 
   usesResource("TFileService");
   edm::Service<TFileService> fs;
 
   h_nevents  = fs->make<TH1D>("nevents", "nevents", 1, 0, 1);
 
-  h_genMuons_pt  = fs->make<TH1D>("gen pt", "gen pt", 200, 5, 205);
-  h_genMuons_eta = fs->make<TH1D>("gen eta", "gen eta", 96, -2.4, 2.4);
-  h_genMuons_phi = fs->make<TH1D>("gen phi", "gen phi", 90, -3, 3);
+  h_genMuons_pt  = fs->make<TH1D>("gen_pt", "gen_pt", 200, 5, 205);
+  h_genMuons_eta = fs->make<TH1D>("gen_eta", "gen_eta", 56, 0, 2.8);
+  h_genMuons_phi = fs->make<TH1D>("gen_phi", "gen_phi", 90, -3, 3);
 
-  h_tight_pt   = fs->make<TH1D>("genMatched tight pt", "genMatched tight pt", 200, 5, 205);
-  h_tight_eta  = fs->make<TH1D>("genMatched tight eta", "genMatched tight eta", 96, -2.4, 2.4);
-  h_tight_phi  = fs->make<TH1D>("genMatched tight phi", "genMatched tight phi", 90, -3, 3);
-  h_tightbystep_pt   = fs->make<TH1D>("genMatched tightbystep pt", "genMatched tightbystep pt", 200, 5, 205);
-  h_tightbystep_eta  = fs->make<TH1D>("genMatched tightbystep eta", "genMatched tightbystep eta", 96, -2.4, 2.4);
-  h_tightbystep_phi  = fs->make<TH1D>("genMatched tightbystep phi", "genMatched tightbystep phi", 90, -3, 3);
-  h_medium_pt  = fs->make<TH1D>("genMatched medium pt", "genMatched medium pt", 200, 5, 205);
-  h_medium_eta = fs->make<TH1D>("genMatched medium eta", "genMatched medium eta", 96, -2.4, 2.4);
-  h_medium_phi = fs->make<TH1D>("genMatched medium phi", "genMatched medium phi", 90, -3, 3);
-  h_loose_pt   = fs->make<TH1D>("genMatched loose pt", "genMatched loose pt", 200, 5, 205);
-  h_loose_eta  = fs->make<TH1D>("genMatched loose eta", "genMatched loose eta", 96, -2.4, 2.4);
-  h_loose_phi  = fs->make<TH1D>("genMatched loose phi", "genMatched loose phi", 90, -3, 3);
+  h_tight_pt   = fs->make<TH1D>("genT_pt", "genMatched tight pt", 200, 5, 205);
+  h_tight_eta  = fs->make<TH1D>("genT_eta", "genMatched tight eta", 56, 0, 2.8);
+  h_tight_phi  = fs->make<TH1D>("genT_phi", "genMatched tight phi", 90, -3, 3);
+  h_tightByStep_pt   = fs->make<TH1D>("genTs_pt", "genMatched tightByStep pt", 200, 5, 205);
+  h_tightByStep_eta  = fs->make<TH1D>("genTs_eta", "genMatched tightByStep eta", 56, 0, 2.8);
+  h_tightByStep_phi  = fs->make<TH1D>("genTs_phi", "genMatched tightByStep phi", 90, -3, 3);
+  h_medium_pt  = fs->make<TH1D>("genM_pt", "genMatched medium pt", 200, 5, 205);
+  h_medium_eta = fs->make<TH1D>("genM_eta", "genMatched medium eta", 56, 0, 2.8);
+  h_medium_phi = fs->make<TH1D>("genM_phi", "genMatched medium phi", 90, -3, 3);
+  h_loose_pt   = fs->make<TH1D>("genL_pt", "genMatched loose pt", 200, 5, 205);
+  h_loose_eta  = fs->make<TH1D>("genL_eta", "genMatched loose eta", 56, 0, 2.8);
+  h_loose_phi  = fs->make<TH1D>("genL_phi", "genMatched loose phi", 90, -3, 3);
 
-  h_tightfake_pt   = fs->make<TH1D>("reco tightfake pt", "reco tightfake pt", 200, 0, 200);
-  h_tightfake_eta  = fs->make<TH1D>("reco tightfake eta", "reco tightfake eta", 100, -2.5, 2.5);
-  h_tightfake_phi  = fs->make<TH1D>("reco tightfake phi", "reco tightfake phi", 90, -3, 3);
-  h_tightbystepfake_pt   = fs->make<TH1D>("reco tightbystepfake pt", "reco tightbystepfake pt", 200, 0, 200);
-  h_tightbystepfake_eta  = fs->make<TH1D>("reco tightbystepfake eta", "reco tightbystepfake eta", 100, -2.5, 2.5);
-  h_tightbystepfake_phi  = fs->make<TH1D>("reco tightbystepfake phi", "reco tightbystepfake phi", 90, -3, 3);
-  h_mediumfake_pt  = fs->make<TH1D>("reco mediumfake pt", "reco mediumfake pt", 200, 0, 200);
-  h_mediumfake_eta = fs->make<TH1D>("reco mediumfake eta", "reco mediumfake eta", 100, -2.5, 2.5);
-  h_mediumfake_phi = fs->make<TH1D>("reco mediumfake phi", "reco mediumfake phi", 90, -3, 3);
-  h_loosefake_pt   = fs->make<TH1D>("reco loosefake pt", "reco loosefake pt", 200, 0, 200);
-  h_loosefake_eta  = fs->make<TH1D>("reco loosefake eta", "reco loosefake eta", 100, -2.5, 2.5);
-  h_loosefake_phi  = fs->make<TH1D>("reco loosefake phi", "reco loosefake phi", 90, -3, 3);
+  h_tightFake_pt   = fs->make<TH1D>("fakeT_pt", "reco tightfake pt", 200, 0, 200);
+  h_tightFake_eta  = fs->make<TH1D>("fakeT_eta", "reco tightfake eta", 56, 0, 2.8);
+  h_tightFake_phi  = fs->make<TH1D>("fakeT_phi", "reco tightfake phi", 90, -3, 3);
+  h_tightByStepFake_pt   = fs->make<TH1D>("fakeTs_pt", "reco tightByStepfake pt", 200, 0, 200);
+  h_tightByStepFake_eta  = fs->make<TH1D>("fakeTs_eta", "reco tightByStepfake eta", 56, 0, 2.8);
+  h_tightByStepFake_phi  = fs->make<TH1D>("fakeTs_phi", "reco tightByStepfake phi", 90, -3, 3);
+  h_mediumFake_pt  = fs->make<TH1D>("fakeM_pt", "reco mediumfake pt", 200, 0, 200);
+  h_mediumFake_eta = fs->make<TH1D>("fakeM_eta", "reco mediumfake eta", 56, 0, 2.8);
+  h_mediumFake_phi = fs->make<TH1D>("fakeM_phi", "reco mediumfake phi", 90, -3, 3);
+  h_looseFake_pt   = fs->make<TH1D>("fakeL_pt", "reco loosefake pt", 200, 0, 200);
+  h_looseFake_eta  = fs->make<TH1D>("fakeL_eta", "reco loosefake eta", 56, 0, 2.8);
+  h_looseFake_phi  = fs->make<TH1D>("fakeL_phi", "reco loosefake phi", 90, -3, 3);
 
-  h_tightdetail  = fs->make<TH1D>("tightdetail", "tightdetail", 8, 0, 8);
+  h_tightdetail  = fs->make<TH1D>("tightDetail", "tightDetail", 8, 0, 8);
   h_hitmap  = fs->make<TH1D>("hitmap", "hitmap", 8, 0, 8);
-  h_hitmap_inrange  = fs->make<TH1D>("hitmap inrange", "hitmap inrange", 8, 0, 8);
+  h_hitmap_inrange  = fs->make<TH1D>("hitmap_inrange", "hitmap inrange", 8, 0, 8);
 
   h_tighttest  = fs->make<TH1D>("genMatched tight test", "genMatched tight test", 15, -3, 3);
-  h_tightbysteptest  = fs->make<TH1D>("genMatched tightbystepbystep test", "genMatched tightbystep test", 15, -3, 3);
+  h_tightBySteptest  = fs->make<TH1D>("genMatched tightByStepbystep test", "genMatched tightByStep test", 15, -3, 3);
   h_mediumtest  = fs->make<TH1D>("genMatched medium test", "genMatched medium test", 15, -3, 3);
   h_loosetest  = fs->make<TH1D>("genMatched loose test", "genMatched loose test", 15, -3, 3);
+
+  h_nGemhits_true = fs->make<TH1D>("nGemhits_true", "nGemhits_true", 30,0,30);
+  h_nGemhits_fake = fs->make<TH1D>("nGemhits_fake", "nGemhits_fake", 30,0,30);
 }
 
 MuonEff::~MuonEff(){}
@@ -138,12 +147,15 @@ void MuonEff::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   iEvent.getByToken(genParticleToken_, genParticles);
   collectGenMuons(*genParticles, genMuons, genMuonsFromZ);
 
-  ///// id
+  edm::Handle<std::vector<PSimHit>> MuonGEMHits;
+  iEvent.getByToken(MuonGEMHitsToken_, MuonGEMHits);
+
+  ///// Gen-Reco matching
   edm::Handle<std::vector<reco::Muon> > muons;
   iEvent.getByToken(muonToken_, muons);
   for (auto& gen : genMuonsFromZ){
     h_genMuons_pt->Fill(gen.pt());
-    h_genMuons_eta->Fill(gen.eta());
+    h_genMuons_eta->Fill(abs(gen.eta()));
     h_genMuons_phi->Fill(gen.phi());
 
     double dR = 0.1;
@@ -159,39 +171,26 @@ void MuonEff::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       
     if ( muon::isTightMuon(mu, pv0) ){
       h_tight_pt->Fill(gen.pt());
-      h_tight_eta->Fill(gen.eta());
+      h_tight_eta->Fill(abs(gen.eta()));
       h_tight_phi->Fill(gen.phi());
-      if (gen.eta()>0.2 && gen.eta() <0.4){
-        h_tighttest->Fill(gen.phi());
-      }
     }
     if ( tightByStep(mu,pv0) ){
-      h_tightbystep_pt->Fill(gen.pt());
-      h_tightbystep_eta->Fill(gen.eta());
-      h_tightbystep_phi->Fill(gen.phi());
-      if (gen.eta()>0.2 && gen.eta() <0.4){
-        h_tightbysteptest->Fill(gen.phi());
-      }
+      h_tightByStep_pt->Fill(gen.pt());
+      h_tightByStep_eta->Fill(abs(gen.eta()));
+      h_tightByStep_phi->Fill(gen.phi());
     }
     if ( muon::isMediumMuon(mu) ){
       h_medium_pt->Fill(gen.pt());
-      h_medium_eta->Fill(gen.eta());
+      h_medium_eta->Fill(abs(gen.eta()));
       h_medium_phi->Fill(gen.phi());
-      if ( !mu.isGlobalMuon() ) cout << "not global" << endl;
-      if (gen.eta()>0.2 && gen.eta() <0.4){
-        h_mediumtest->Fill(gen.phi());
-      }
     }
     if ( muon::isLooseMuon(mu) ){
       h_loose_pt->Fill(gen.pt());
-      h_loose_eta->Fill(gen.eta());
+      h_loose_eta->Fill(abs(gen.eta()));
       h_loose_phi->Fill(gen.phi());
-      if (gen.eta()>0.2 && gen.eta() <0.4){
-        h_loosetest->Fill(gen.phi());
-      }
     }
 
-    // test
+    // hitmap
     fillHitMap(mu, h_hitmap);
     if (gen.eta()>0.2 && gen.eta()<0.4 && gen.phi()>1.4 && gen.phi()<1.8 && muon::isMediumMuon(mu) && !(muon::isTightMuon(mu, pv0)) ){
       h_tightdetail->Fill(0);
@@ -217,26 +216,30 @@ void MuonEff::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       fake = false;
     }
     if (fake){
+      if (isGEMrange(mu)) h_nGemhits_fake->Fill((*MuonGEMHits).size());
       if ( muon::isTightMuon(mu, pv0) ){
-        h_tightfake_pt->Fill(mu.pt());
-        h_tightfake_eta->Fill(mu.eta());
-        h_tightfake_phi->Fill(mu.phi());
+        h_tightFake_pt->Fill(mu.pt());
+        h_tightFake_eta->Fill(abs(mu.eta()));
+        h_tightFake_phi->Fill(mu.phi());
       }
       if ( tightByStep(mu, pv0) ){
-        h_tightbystepfake_pt->Fill(mu.pt());
-        h_tightbystepfake_eta->Fill(mu.eta());
-        h_tightbystepfake_phi->Fill(mu.phi());
+        h_tightByStepFake_pt->Fill(mu.pt());
+        h_tightByStepFake_eta->Fill(abs(mu.eta()));
+        h_tightByStepFake_phi->Fill(mu.phi());
       }
       if ( muon::isMediumMuon(mu) ){
-        h_mediumfake_pt->Fill(mu.pt());
-        h_mediumfake_eta->Fill(mu.eta());
-        h_mediumfake_phi->Fill(mu.phi());
+        h_mediumFake_pt->Fill(mu.pt());
+        h_mediumFake_eta->Fill(abs(mu.eta()));
+        h_mediumFake_phi->Fill(mu.phi());
       }
       if ( muon::isLooseMuon(mu) ){
-        h_loosefake_pt->Fill(mu.pt());
-        h_loosefake_eta->Fill(mu.eta());
-        h_loosefake_phi->Fill(mu.phi());
+        h_looseFake_pt->Fill(mu.pt());
+        h_looseFake_eta->Fill(abs(mu.eta()));
+        h_looseFake_phi->Fill(mu.phi());
       }
+    }
+    else {
+      if (isGEMrange(mu)) h_nGemhits_true->Fill((*MuonGEMHits).size());
     }
   }
 

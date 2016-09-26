@@ -12,97 +12,45 @@ def histinit(h, binning):
     h.SetStats(0)
     rebin(h, binning)
 
-#binninglst = [[30,0,60],[12,-2.4,2.4],[6,-3,3]]
-binninglst = [[20,5,105],[24,-2.4,2.4],[30,-3,3]]
-filenames=["run2"]
-#filenames=["nopu","pu35","pu200"]
-for filename in filenames:
-    tfile = ROOT.TFile("../"+filename+".root")
-    nevents = tfile.Get("MuonEff/nevents").GetEntries()
-    for i, plotvar in enumerate(['pt','eta','phi']):
-        gen = tfile.Get("MuonEff/gen %s"%(plotvar))
-        histinit(gen,binninglst[i])
-        gen.Sumw2()
-        eff=gen.Clone()
-        lst=[]
-        fakelst=[]
-        for id in ['tight','medium','loose']:
-            reco = tfile.Get("MuonEff/genMatched %s %s"%(id,plotvar))
-            histinit(reco,binninglst[i])
-            reco.Sumw2()
-            eff.Divide(reco, gen, 1, 1, "B")
-            eff.SetTitle(id)
-            lst.append(copy.deepcopy(eff))
+def setHistStyle(h,var,i):
+    if "eff" in var:
+        h.SetMaximum(1.05)
+        h.SetMinimum(0.4)
+        h.SetFillColor(i+2)
+        h.SetLineColor(0)
+        h.SetMarkerStyle(0)
+        drawoption="e5same"
+    if "fake" in var:
+        h.SetMaximum(max(h.GetMaximum() for h in hlist)*2)
+        h.SetLineColor(i+2)
+        h.SetLineWidth(2)
+        drawoption="histsame"
+    return drawoption
+    
 
-            fake = tfile.Get("MuonEff/reco %sfake %s"%(id,plotvar))
-            fake.Scale(1/nevents)
-            histinit(fake,binninglst[i])
-            fake.SetTitle(id)
-            fakelst.append(copy.deepcopy(fake))
+filenames=["pu0","pu140","pu200"]
+plotvar=["efficPt","effic","fakeratePt","fakerate"]
+ids = ["Tight","Loose"]
 
-        reco = tfile.Get("MuonEff/genMatched %s %s"%('tightbystep',plotvar))
-        histinit(reco,binninglst[i])
-        reco.Sumw2()
-        eff.Divide(reco, gen, 1, 1, "B")
-        eff.SetTitle("tight(w/o dz(PV) cut)")
-        fixed = copy.deepcopy(eff)
-
-        print "MuonEff/reco %sfake %s"%('tightbystep',plotvar)
-        fake = tfile.Get("MuonEff/reco %sfake %s"%('tightbystep',plotvar))
-        fake.Scale(1/nevents)
-        histinit(fake,binninglst[i])
-        fake.SetTitle("tight(w/o dz(PV) cut)")
-        fixed_fake = copy.deepcopy(fake)
-
-        eff.Reset()
-        eff.SetMaximum(1.05)
-        eff.SetMinimum(0.4)
-        eff.SetLineColor(0)
-        eff.SetTitle("%s_%s"%(filename,plotvar))
+for i, p in enumerate(plotvar):
+    for filename in filenames:
+        hlist = []
+        for id in ids:
+            tfile = ROOT.TFile(filename+".root")
+            tdir="DQMData/Run 1/Muons/Run summary/RecoMuonV/MultiTrack/bestMuon%s5_tpTo%sSel05MuonAssociation/"%(id,id)
+            h = tfile.Get(tdir+p)
+            h.SetStats(0)
+            hlist.append(copy.deepcopy(h))
 
         cn = ROOT.TCanvas()
-        eff.Draw()
-        leg = ROOT.TLegend(0.58,0.14,0.88,0.4)
-        for i, h in enumerate(lst):
-            h.SetFillColor(i+2)
-            h.SetLineColor(0)
-            h.SetFillStyle(3001)
-            h.SetMarkerStyle(0)
-            h.Draw("e5same")
-            leg.AddEntry(h,h.GetTitle(),"f")
+        leg = ROOT.TLegend(0.55,0.4,0.8,0.58)
 
-        fixed.SetLineColor(0)
-        fixed.SetFillColor(2)
-        fixed.SetMarkerStyle(0)
-        fixed.Draw("e5same")
-        leg.AddEntry(fixed,fixed.GetTitle(),"f")
+        for i,h in enumerate(hlist):
+            drawoption = setHistStyle(h,p,i)
+            h.Draw(drawoption)
+            leg.AddEntry(h, h.GetTitle(), "f")
 
         leg.SetBorderSize(0)
         leg.Draw()
-        cn.Print("%s_%s.png"%(filename,plotvar))
-
-        cn2 = ROOT.TCanvas()
-        leg = ROOT.TLegend(0.58,0.58,0.88,0.88)
-        #leg.SetNColumns(2)
-        fake = copy.deepcopy(fakelst[0])
-        fake.SetLineColor(0)
-        fake.SetTitle("fake %s %s"%(filename,plotvar))
-        fake.SetMaximum(max(h.GetMaximum() for h in fakelst)*2.2)
-        fake.Draw()
-        for i, h in enumerate(fakelst):
-            h.SetLineColor(i+2)
-            h.SetLineWidth(2)
-            h.Draw("same")
-            leg.AddEntry(h,h.GetTitle(),"f")
-
-        fixed_fake.SetLineColor(2)
-        fixed_fake.SetLineWidth(3)
-        fixed_fake.SetLineStyle(2)
-        fixed_fake.Draw("same")
-        leg.AddEntry(fixed_fake,fixed_fake.GetTitle(),"f")
-
-        leg.SetBorderSize(0)
-        leg.Draw()
-        cn2.Print("fake_%s_%s.png"%(filename,plotvar))
-
+        cn.Print("%s_%s.png"%(filename,p))
 

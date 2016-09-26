@@ -161,6 +161,8 @@ void MuonEff::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     double dR = 0.1;
     const reco::Muon* muMatched = nullptr;
     for (auto& mu : *muons) {
+      if (mu.pt()<5) continue;
+      //if (std::abs(mu.eta())>2.4) continue;
       double dR_tmp = reco::deltaR(gen, mu);
       if (dR < dR_tmp) continue;
       dR = dR_tmp;
@@ -209,6 +211,8 @@ void MuonEff::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   //// fake rate
   double rcut = 0.3;
   for (auto& mu : *muons) {
+    if (mu.pt()<5) continue;
+    //if (std::abs(mu.eta())>2.4) continue;
     bool fake = true;
     for (auto& gen : genMuons){
       double dR = reco::deltaR(gen, mu);
@@ -251,7 +255,7 @@ void MuonEff::collectGenMuons(const std::vector<reco::GenParticle>& genParticles
     if (std::abs(gen.pdgId())!=13) continue;
     genMuons.push_back(gen);
     if (gen.pt()<5) continue;
-    if (std::abs(gen.eta())>2.4) continue;
+    //if (std::abs(gen.eta())>2.4) continue;
     bool isMotherZ = false;
     for ( size_t i=0, n=gen.numberOfMothers(); i<n; ++i ) {
         if (std::abs(gen.mother(i)->pdgId()) == 23) { isMotherZ = true; break; }

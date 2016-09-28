@@ -12,45 +12,87 @@ def histinit(h, binning):
     h.SetStats(0)
     rebin(h, binning)
 
-def setHistStyle(h,var,i):
-    if "eff" in var:
-        h.SetMaximum(1.05)
-        h.SetMinimum(0.4)
-        h.SetFillColor(i+2)
-        h.SetLineColor(0)
-        h.SetMarkerStyle(0)
-        drawoption="e5same"
-    if "fake" in var:
-        h.SetMaximum(max(h.GetMaximum() for h in hlist)*2)
-        h.SetLineColor(i+2)
-        h.SetLineWidth(2)
-        drawoption="histsame"
-    return drawoption
-    
+#binninglst = [[30,0,60],[12,-2.4,2.4],[6,-3,3]]
+binninglst = [[20,5,105],[24,-2.4,2.4],[30,-3,3]]
+filenames=["run2","nopu","pu140","pu200"]
+for filename in filenames:
+    tfile = ROOT.TFile("../"+filename+".root")
+    nevents = tfile.Get("MuonEff/nevents").GetEntries()
+    for i, plotvar in enumerate(['pt','eta','phi']):
+        gen = tfile.Get("MuonEff/gen_%s"%(plotvar))
+        histinit(gen,binninglst[i])
+        gen.Sumw2()
+        eff=gen.Clone()
+        lst=[]
+        fakelst=[]
+        for id in ['tight','medium','loose']:
+            reco = tfile.Get("MuonEff/gen%s_%s"%(id[0].capitalize(),plotvar))
+            histinit(reco,binninglst[i])
+            reco.Sumw2()
+            eff.Divide(reco, gen, 1, 1, "B")
+            eff.SetTitle(id)
+            lst.append(copy.deepcopy(eff))
 
-filenames=["pu0","pu140","pu200"]
-plotvar=["efficPt","effic","fakeratePt","fakerate"]
-ids = ["Tight","Loose"]
+            fake = tfile.Get("MuonEff/fake%s_%s"%(id[0].capitalize(),plotvar))
+            fake.Scale(1/nevents)
+            histinit(fake,binninglst[i])
+            fake.SetTitle(id)
+            fakelst.append(copy.deepcopy(fake))
 
-for i, p in enumerate(plotvar):
-    for filename in filenames:
-        hlist = []
-        for id in ids:
-            tfile = ROOT.TFile(filename+".root")
-            tdir="DQMData/Run 1/Muons/Run summary/RecoMuonV/MultiTrack/bestMuon%s5_tpTo%sSel05MuonAssociation/"%(id,id)
-            h = tfile.Get(tdir+p)
-            h.SetStats(0)
-            hlist.append(copy.deepcopy(h))
+        eff.Reset()
+        eff.SetMaximum(1.05)
+        eff.SetMinimum(0.4)
+        eff.SetLineColor(0)
+        eff.SetTitle("%s_%s"%(filename,plotvar))
 
+        drawoption = "e5same"
+        if 'pu' not in filename: drawoption = "csame"
         cn = ROOT.TCanvas()
-        leg = ROOT.TLegend(0.55,0.4,0.8,0.58)
-
-        for i,h in enumerate(hlist):
-            drawoption = setHistStyle(h,p,i)
+        eff.Draw()
+        leg = ROOT.TLegend(0.58,0.14,0.88,0.4)
+        for i, h in enumerate(lst):
+            h.SetFillColor(i+2)
+            h.SetLineColor(i+2)
+            h.SetLineWidth(2)
+            h.SetFillStyle(3001)
+            h.SetMarkerStyle(0)
             h.Draw(drawoption)
-            leg.AddEntry(h, h.GetTitle(), "f")
+            leg.AddEntry(h,h.GetTitle(),"f")
 
         leg.SetBorderSize(0)
         leg.Draw()
-        cn.Print("%s_%s.png"%(filename,p))
+
+        tex = ROOT.TLatex()
+        tex.SetNDC()
+        tex.SetTextFont(42)
+        tex.SetTextSize(0.03)
+        tex.DrawLatex(0.2, 0.3, "#frac{Number of matched gen muon}{Number of total gen muon}")
+
+        cn.Print("%s_%s.png"%(filename,plotvar))
+
+        cn2 = ROOT.TCanvas()
+        leg = ROOT.TLegend(0.58,0.58,0.88,0.88)
+        #leg.SetNColumns(2)
+        fake = copy.deepcopy(fakelst[0])
+        fake.SetLineColor(0)
+        fake.SetTitle("fake %s %s"%(filename,plotvar))
+        fake.SetMaximum(max(h.GetMaximum() for h in fakelst)*2.2)
+        fake.Draw()
+        for i, h in enumerate(fakelst):
+            h.SetLineColor(i+2)
+            h.SetLineWidth(2)
+            h.Draw("same")
+            leg.AddEntry(h,h.GetTitle(),"f")
+
+        leg.SetBorderSize(0)
+        leg.Draw()
+
+        tex = ROOT.TLatex()
+        tex.SetNDC()
+        tex.SetTextFont(42)
+        tex.SetTextSize(0.03)
+        tex.DrawLatex(0.15, 0.75, "#frac{Number of non matched reco muon}{Number of total reco muon}")
+
+        cn2.Print("fake_%s_%s.png"%(filename,plotvar))
+
 

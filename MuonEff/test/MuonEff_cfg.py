@@ -1,5 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
+print "hi"
 process = cms.Process("MuonEff")
 
 process.load("FWCore.MessageService.MessageLogger_cfi")
